@@ -17,3 +17,5 @@ grunt
 ```
 ### STEP 2
 Open dest/index.html In your browser that supports WebGL.
+
+(You must use a local server.)
