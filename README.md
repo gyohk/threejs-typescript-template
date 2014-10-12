@@ -1,5 +1,6 @@
 threejs-typescript-template
 ===========================
+[![Build Status](https://travis-ci.org/gyohk/threejs-typescript-template.png?branch=master)](https://travis-ci.org/gyohk/threejs-typescript-template)
 
 Project template for coding your program with three.js in TypeScript.
 
