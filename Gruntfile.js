@@ -49,6 +49,17 @@ module.exports = function (grunt) {
                 src: ['<%= opt.tsDir %>/Main.ts']
             }
         },
+        typedoc: {
+            build: {
+                options: {
+                    module: 'commonjs',
+                    out: './docs',
+                    name: 'my-project',
+                    target: 'es5'
+                },
+                src: ['./src/**/*']
+            }
+        },
         copy: {
             app: {
                 files: [
@@ -74,4 +85,5 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-ts');
     grunt.loadNpmTasks('grunt-tsd');
     grunt.loadNpmTasks('grunt-tslint');
+    grunt.loadNpmTasks('grunt-typedoc');
 };
