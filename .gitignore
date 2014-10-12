@@ -8,6 +8,7 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 .DS_Store
+npm-debug.log
 .baseDir.ts
 .baseDir.js
 .tscache
