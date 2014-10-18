@@ -25,3 +25,8 @@ If you have installed Chrome on your PC, you can also use the following command.
 ```
 grunt connect
 ```
+
+#### tsd usage
+```
+tsd query <module name> --action install --resolve --save --config conf/tsd.json
+```

@@ -84,15 +84,15 @@ module.exports = function (grunt) {
                         target: 'http://localhost:9001',
                         appName: 'Chrome' // open, Firefox, Chrome
                     },
-                    keepalive: true,
+                    keepalive: true
                     
                 }
             }
         }
     });
     
-    grunt.registerTask('setup', ['clean', 'tsd']);
-    grunt.registerTask('default', ['clean', 'copy', 'ts', 'tslint']);
+    grunt.registerTask('setup', ['clean', 'tsd', 'copy']);
+    grunt.registerTask('default', ['ts', 'tslint']);
     
     // 
     grunt.loadNpmTasks('grunt-contrib-copy');

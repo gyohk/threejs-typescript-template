@@ -6,10 +6,10 @@ before_install:
   - npm install -g grunt-cli
   - npm install
   
-before_script
+before_script:
   - grunt setup
   
-script
+script:
   - grunt
 
 notifications:
