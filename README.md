@@ -20,3 +20,9 @@ grunt
 Open dest/index.html In your browser that supports WebGL.
 
 (You must use a local server.)
+
+### STEP 3
+If you have installed Chrome on your PC, you can also use the following command.
+```
+grunt connect
+```
