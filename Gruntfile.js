@@ -74,6 +74,21 @@ module.exports = function (grunt) {
                 ]
             }
         },
+        connect: {
+            server: {
+                options: {
+                    port: 9001,
+                    hostname: 'localhost',
+                    base: 'dest',
+                    open: {
+                        target: 'http://localhost:9001',
+                        appName: 'Chrome' // open, Firefox, Chrome
+                    },
+                    keepalive: true,
+                    
+                }
+            }
+        }
     });
     
     grunt.registerTask('setup', ['clean', 'tsd']);
@@ -82,6 +97,7 @@ module.exports = function (grunt) {
     // 
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-ts');
     grunt.loadNpmTasks('grunt-tsd');
     grunt.loadNpmTasks('grunt-tslint');
