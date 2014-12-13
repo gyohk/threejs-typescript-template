@@ -4,31 +4,27 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <style>
         body {
-            color: #61443e;
+            background-color: #000;
+            color: #fff;
+            margin: 0px;
+            overflow: hidden;
             font-family:Monospace;
             font-size:13px;
             text-align:center;
-
-            background-color: #aaccff;
-            margin: 0px;
-            overflow: hidden;
-        }
-
-        #info {
-            color: #ffffff;
-            position: absolute;
-            top: 0px; width: 100%;
-            padding: 5px;
+            font-weight: bold;
+            text-align:center;
         }
 
         a {
-
-            color: yellow;
+            color:#0078ff;
         }
 
-        #oldie {
-            background:rgb(0,0,50) !important;
-            color:#fff !important;
+        #info {
+            color:#fff;
+            position: absolute;
+            top: 0px; width: 100%;
+            padding: 5px;
+            z-index:100;
         }
     </style>
     <!--[if lt IE 9]>
@@ -37,9 +33,16 @@
     <!--[if gte IE 9]><!-->
     <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
     <!--<![endif]-->
-    <script src="build/three.min.js"></script>
+
+    <script src="../build/three.min.js"></script>
+    <script src="js/shaders/ConvolutionShader.js"></script>
+    <script src="js/shaders/CopyShader.js"></script>
+    <script src="js/postprocessing/EffectComposer.js"></script>
+    <script src="js/postprocessing/RenderPass.js"></script>
+    <script src="js/postprocessing/MaskPass.js"></script>
+    <script src="js/postprocessing/BloomPass.js"></script>
+    <script src="js/postprocessing/ShaderPass.js"></script>
     <script src="js/Detector.js"></script>
-    <script src="js/libs/stats.min.js"></script>
 
     <script type="text/javascript" src="js/Main.js"></script>
     <script type="text/javascript">
@@ -51,6 +54,9 @@
     </script>
 </head>
 <body>
-
+<video id="video" autoplay loop style="display:none">
+    <source src="textures/sintel.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+    <source src="textures/sintel.ogv" type='video/ogg; codecs="theora, vorbis"'>
+</video>
 </body>
 </html>

@@ -1,248 +1,237 @@
 ///<reference path="../typings/tsd.d.ts" />
 
+declare module THREE {
+    var BloomPass: any;
+}
 
 module app {
     "use strict";
 
     export class Main {
-        private scene: THREE.Scene;
-        private camera: THREE.PerspectiveCamera;
-        private renderer: THREE.WebGLRenderer;
-        private stats: Stats;
-        private material: THREE.MeshBasicMaterial;
-        private texture: THREE.Texture;
-        private container: THREE.Group;
-        private lights: THREE.Mesh[];
-        private content: THREE.Group;
-        private front: THREE.Mesh;
-        private ground: THREE.Mesh;
-        private light: THREE.PointLight;
-        private id: number;
-        private radius: number;
-        private angle: number;
-        private degree: number;
-        private depression: number;
-        private radian: number;
-        private center: THREE.Object3D;
-
-
-        private resize = (event:Event):void => {
-            this.camera.aspect = window.innerWidth/window.innerHeight;
-            this.camera.updateProjectionMatrix();
-            this.renderer.setSize(window.innerWidth, window.innerHeight);
-        };
-
-        private loaded = (data:THREE.Texture):void => {
-            this.texture = data;
-            this.initialize();
-            this.render();
-        };
+        private container:HTMLElement;
+        private camera:THREE.PerspectiveCamera;
+        private scene:THREE.Scene;
+        private renderer:THREE.WebGLRenderer;
+        private video:HTMLVideoElement;
+        private texture:THREE.Texture;
+        private material:THREE.MeshLambertMaterial;
+        private material_settings: {
+            hue: number;
+            saturation: number;
+        }[];
+        private mesh:THREE.Mesh;
+        private mesh_settings: {
+            dx: number;
+            dy: number;
+        }[];
+        private composer:THREE.EffectComposer;
+        private mouseX:number;
+        private mouseY:number;
+        private windowHalfX:number;
+        private windowHalfY:number;
+        private cube_count:number;
+        private meshes: THREE.Mesh[];
+        private materials: THREE.MeshLambertMaterial[];
+        private xgrid:number;
+        private ygrid:number;
+        private counter: number;
 
         constructor() {
             if (!Detector.webgl) {
                 Detector.addGetWebGLMessage();
             }
 
-            this.id = 0;
-            this.radius = 500;
-            this.angle = 0;
-            this.degree = 0;
-            this.depression = 15;
-            this.radian = Math.PI/180;
-            this.center = new THREE.Object3D();
+            this.mouseX = 0;
+            this.mouseY = 0;
+            this.windowHalfX = window.innerWidth / 2;
+            this.windowHalfY = window.innerHeight / 2;
+            this.meshes = [];
+            this.mesh_settings = [];
+            this.materials = [];
+            this.material_settings = [];
+            this.xgrid = 20;
+            this.ygrid = 10;
 
-            this.scene = new THREE.Scene();
-            this.camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
-            this.scene.add(this.camera);
-            this.light = new THREE.PointLight(0xFFFFFF, 1, 200);
-            this.scene.add(this.light);
-            this.renderer = new THREE.WebGLRenderer({antialias: true});
-            this.renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(this.renderer.domElement);
+            this.counter = 1;
 
-            this.setup();
-            this.background();
-            //initialize();
-            THREE.ImageUtils.loadTexture("textures/light.png", undefined, this.loaded);
-
-            this.stats = new Stats();
-            this.stats.setMode(0);
-            this.stats.domElement.style.position = "fixed";
-            this.stats.domElement.style.right = "0px";
-            this.stats.domElement.style.top = "0px";
-            document.body.appendChild(this.stats.domElement);
-
-            //render();
-            window.addEventListener("resize", this.resize, false);
-        }
-
-        private setup():void {
-            this.renderer.setClearColor(0x000000, 1);
-            this.camera.position.z = -this.radius;
-            this.light.position.set(0, -100, 0);
-        }
-
-        private background():void {
-            var geometry = new THREE.PlaneGeometry(400, 400);
-            var material = new THREE.MeshPhongMaterial({side: THREE.BackSide , color: 0xFFFFFF});
-            material.emissive.set(0x333333);
-            material.specular.set(0xFFFFFF);
-            material.shininess = 16;
-            this.ground = new THREE.Mesh(geometry, material);
-            this.ground.rotation.x = 90*this.radian;
-            this.ground.position.y = - 200;
-            this.scene.add(this.ground);
-        }
-
-        private initialize():void {
-            this.container = new THREE.Group();
-            this.scene.add(this.container);
-
-            this.material = new THREE.MeshBasicMaterial({map: this.texture, side: THREE.DoubleSide});
-            this.material.transparent = true;
-            this.material.depthTest = false;
-            this.lights = [];
-            for (var n = 0; n < 3; n++) {
-                var offset = 64*n;
-                var geometry = new THREE.CylinderGeometry(0, 256 - offset, offset, 60, 15, true);
-
-                var light1 = new THREE.Mesh(geometry, this.material.clone());
-                light1.rotation.y = 120*n*this.radian;
-                light1.position.y = - offset/2;
-
-                var light2 = new THREE.Mesh(geometry, this.material.clone());
-                light2.rotation.y = 120*n*this.radian;
-                light2.rotation.x = 180*this.radian;
-                light2.position.y = offset/2;
-
-                var light3 = new THREE.Mesh(geometry, this.material.clone());
-                light3.rotation.y = 120*n*this.radian;
-                light3.rotation.x = 90*this.radian;
-                light3.position.z = - offset/2;
-
-                this.container.add(light1);
-                this.container.add(light2);
-                this.container.add(light3);
-                this.lights.push(light1);
-                this.lights.push(light2);
-                this.lights.push(light3);
-            }
-            this.overlay();
-        }
-
-        private overlay(): void {
-        this.content = new THREE.Group();
-            this.scene.add(this.content);
-
-            var geometry = new THREE.CylinderGeometry(0, 256, 0, 60, 15, true);
-            var _material = this.material.clone();
-            _material.blending = THREE.AdditiveBlending;
-            this.front = new THREE.Mesh(geometry, _material);
-            this.content.add(this.front);
-            this.front.rotation.x = 90*this.radian;
-        }
-
-        private render():void {
-            requestAnimationFrame(()=>this.render());
+            this.init();
             this.animate();
         }
-        private animate():void {
-            var alpha = Math.random()*0.4 + 0.6;
-            var hue = this.id + 40;
-            var rgb = this.convert(hue, 1, 1);
-            var argb = this.convert(hue, 1, 0.3*alpha);
 
-            var mat = <THREE.MeshPhongMaterial>(this.ground.material);
-            mat.specular.set(rgb);
-            mat.shininess = 16*alpha;
-            mat.color.set(argb);
 
-            this.container.rotation.x += 0.1*this.radian;
-            this.container.rotation.y += 0.2*this.radian;
-            this.container.rotation.z += 0.15*this.radian;
-            for (var n = 0; n < this.lights.length; n++) {
-                rgb = this.convert(this.id + 10*n, 1, 1);
-                var light = this.lights[n];
-                var lmat = <THREE.MeshBasicMaterial>light.material;
-                light.rotation.y += 0.2*n*this.radian;
-                lmat.opacity = alpha;
-                lmat.color.set(rgb);
+        private onWindowResize = ():void => {
+            this.windowHalfX = window.innerWidth / 2;
+            this.windowHalfY = window.innerHeight / 2;
+
+            this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.camera.updateProjectionMatrix();
+
+            this.renderer.setSize( window.innerWidth, window.innerHeight );
+            this.composer.reset();
+        };
+
+        private onDocumentMouseMove = (event: MouseEvent):void => {
+            this.mouseX = ( event.clientX - this.windowHalfX );
+            this.mouseY = ( event.clientY - this.windowHalfY ) * 0.3;
+        };
+
+        private init():void {
+            this.container = document.createElement('div');
+            document.body.appendChild(this.container);
+
+            this.camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 10000);
+            this.camera.position.z = 500;
+            this.scene = new THREE.Scene();
+
+            var light = new THREE.DirectionalLight(0xffffff);
+            light.position.set(0.5, 1, 1).normalize();
+            this.scene.add(light);
+
+            this.renderer = new THREE.WebGLRenderer({antialias: false});
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+            this.container.appendChild(this.renderer.domElement);
+
+            this.video = <HTMLVideoElement>document.getElementById('video');
+
+            this.texture = new THREE.VideoTexture(this.video);
+            this.texture.minFilter = THREE.LinearFilter;
+            this.texture.magFilter = THREE.LinearFilter;
+            this.texture.format = THREE.RGBFormat;
+            //
+            var i:number, j:number, ux:number, uy:number, ox:number, oy:number,
+                geometry:THREE.Geometry,
+                xsize:number, ysize:number;
+
+            ux = 1 / this.xgrid;
+            uy = 1 / this.ygrid;
+
+            xsize = 480 / this.xgrid;
+            ysize = 204 / this.ygrid;
+
+            var parameters = {color: 0xffffff, map: this.texture};
+            this.cube_count = 0;
+
+            for (i = 0; i < this.xgrid; i++) {
+                for (j = 0; j < this.ygrid; j++) {
+                    ox = i;
+                    oy = j;
+
+                    geometry = new THREE.BoxGeometry(xsize, ysize, xsize);
+
+                    this.change_uvs(geometry, ux, uy, ox, oy);
+                    this.materials[this.cube_count] = new THREE.MeshLambertMaterial(parameters);
+                    this.material = this.materials[this.cube_count];
+
+                    this.material_settings[this.cube_count] = {
+                        "hue": i / this.xgrid,
+                        "saturation": 1 - j / this.ygrid
+                    };
+                    this.material.color.setHSL(
+                        this.material_settings[this.cube_count].hue,
+                        this.material_settings[this.cube_count].saturation,
+                        0.5
+                    );
+
+                    this.mesh = new THREE.Mesh(geometry, this.material);
+
+                    this.mesh.position.x = ( i - this.xgrid / 2 ) * xsize;
+                    this.mesh.position.y = ( j - this.ygrid / 2 ) * ysize;
+                    this.mesh.position.z = 0;
+
+                    this.mesh.scale.x = this.mesh.scale.y = this.mesh.scale.z = 1;
+
+                    this.scene.add(this.mesh);
+
+                    this.mesh_settings[this.cube_count] = {
+                        'dx': 0.001 * ( 0.5 - Math.random() ),
+                        'dy': 0.001 * ( 0.5 - Math.random() )
+                    };
+                    this.meshes[this.cube_count] = this.mesh;
+
+                    this.cube_count += 1;
+                }
             }
-            this.id = (this.id + 1)%360;
+            this.renderer.autoClear = false;
 
-            this.angle -= 0.5;
-            this.degree += 1;
-            var dip = this.depression*Math.sin(this.degree*this.radian);
-            this.camera.position.x = this.radius*Math.cos(this.angle*this.radian)*Math.cos(dip*this.radian);
-            this.camera.position.y = this.radius*Math.sin(dip*this.radian);
-            this.camera.position.z = this.radius*Math.sin(this.angle*this.radian)*Math.cos(dip*this.radian);
-            this.camera.lookAt(this.center.position);
+            document.addEventListener('mousemove', this.onDocumentMouseMove, false);
 
-            this.front.rotation.y += 0.2*this.radian;
-            this.front.material.opacity = 0.8*alpha;
-            this.content.position.x = this.camera.position.x*0.08;
-            this.content.position.y = this.camera.position.y*0.08;
-            this.content.position.z = this.camera.position.z*0.08;
-            this.content.lookAt(this.camera.position);
+            // postprocessing
 
-            this.renderer.render(this.scene, this.camera);
+            var renderModel = new THREE.RenderPass(this.scene, this.camera);
+            var effectBloom = new THREE.BloomPass(1.3);
+            var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
+            effectCopy.renderToScreen = true;
 
-            this.stats.update();
+            this.composer = new THREE.EffectComposer(this.renderer);
+
+            this.composer.addPass(renderModel);
+            this.composer.addPass(effectBloom);
+            this.composer.addPass(effectCopy);
+            //
+
+            window.addEventListener('resize', this.onWindowResize, false);
         }
 
-        private convert(h: number, s: number, v: number): number {
-            var r: number, g: number, b: number, rgb: number;
-            v = 0xFF*v;
-            while (h < 0) {
-                h += 360;
+        private change_uvs( geometry: THREE.Geometry, unitx: number, unity: number, offsetx: number, offsety: number ) {
+            var faceVertexUvs = geometry.faceVertexUvs[ 0 ];
+            for ( var i = 0; i < faceVertexUvs.length; i ++ ) {
+                var uvs = faceVertexUvs[ i ];
+                for ( var j = 0; j < uvs.length; j ++ ) {
+                    var uv = uvs[ j ];
+                    uv.x = ( uv.x + offsetx ) * unitx;
+                    uv.y = ( uv.y + offsety ) * unity;
+                }
             }
-            h %= 360;
-            if (s === 0) {
-                v = Math.round(v);
-                rgb = v << 16 | v << 8 | v;
+        }
 
-                return rgb;
+        private animate():void {
+            requestAnimationFrame( () => this.animate() );
+            this.render();
+        }
+
+        private render() {
+            var time = Date.now() * 0.00005;
+
+            this.camera.position.x += ( this.mouseX - this.camera.position.x ) * 0.05;
+            this.camera.position.y += ( - this.mouseY - this.camera.position.y ) * 0.05;
+
+            this.camera.lookAt( this.scene.position );
+
+            for (var i = 0; i < this.cube_count; i ++ ) {
+                this.material = this.materials[ i ];
+                var mat_settings = this.material_settings[i];
+
+                var h = ( 360 * ( mat_settings.hue + time ) % 360 ) / 360;
+                this.material.color.setHSL( h, mat_settings.saturation, 0.5 );
             }
-            var i = Math.floor(h/60)%6;
-            var f = (h/60) - i;
-            var p = v*(1 - s);
-            var q = v*(1 - f*s);
-            var t = v*(1 - (1 - f)*s);
-            switch (i) {
-                case 0 :
-                    r = v;
-                    g = t;
-                    b = p;
-                    break;
-                case 1 :
-                    r = q;
-                    g = v;
-                    b = p;
-                    break;
-                case 2 :
-                    r = p;
-                    g = v;
-                    b = t;
-                    break;
-                case 3 :
-                    r = p;
-                    g = q;
-                    b = v;
-                    break;
-                case 4 :
-                    r = t;
-                    g = p;
-                    b = v;
-                    break;
-                case 5 :
-                    r = v;
-                    g = p;
-                    b = q;
-                    break;
+
+            if ( this.counter % 1000 > 200 ) {
+                for ( i = 0; i < this.cube_count; i ++ ) {
+                    this.mesh = this.meshes[ i ];
+                    var mesh_settings = this.mesh_settings[i];
+
+                    this.mesh.rotation.x += 10 * mesh_settings.dx;
+                    this.mesh.rotation.y += 10 * mesh_settings.dy;
+
+                    this.mesh.position.x += 200 * mesh_settings.dx;
+                    this.mesh.position.y += 200 * mesh_settings.dy;
+                    this.mesh.position.z += 400 * mesh_settings.dx;
+                }
             }
-            rgb = r << 16 | g << 8 | b;
-            return rgb;
+
+            if ( this.counter % 1000 === 0 ) {
+                for ( i = 0; i < this.cube_count; i ++ ) {
+                    this.mesh = this.meshes[ i ];
+
+                    this.mesh_settings[i].dx *= -1;
+                    this.mesh_settings[i].dy *= -1;
+                }
+            }
+            this.counter ++;
+
+            this.renderer.clear();
+            this.composer.render();
         }
     }
 }
-
