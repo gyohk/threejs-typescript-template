@@ -4,26 +4,31 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <style>
         body {
-            background-color: #000000;
-            margin: 0px;
-            overflow: hidden;
+            color: #61443e;
             font-family:Monospace;
             font-size:13px;
             text-align:center;
-            font-weight: bold;
-            text-align:center;
-        }
 
-        a {
-            color:#0078ff;
+            background-color: #aaccff;
+            margin: 0px;
+            overflow: hidden;
         }
 
         #info {
-            color:#fff;
+            color: #ffffff;
             position: absolute;
             top: 0px; width: 100%;
             padding: 5px;
-            z-index:100;
+        }
+
+        a {
+
+            color: yellow;
+        }
+
+        #oldie {
+            background:rgb(0,0,50) !important;
+            color:#fff !important;
         }
     </style>
     <!--[if lt IE 9]>
@@ -33,6 +38,7 @@
     <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
     <!--<![endif]-->
     <script src="build/three.min.js"></script>
+    <script src="js/controls/FirstPersonControls.js"></script>
     <script src="js/Detector.js"></script>
     <script src="js/libs/stats.min.js"></script>
 
@@ -46,5 +52,6 @@
     </script>
 </head>
 <body>
+<div id="container"></div>
 </body>
 </html>
