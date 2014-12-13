@@ -7,6 +7,11 @@
             background-color: #000000;
             margin: 0px;
             overflow: hidden;
+            font-family:Monospace;
+            font-size:13px;
+            text-align:center;
+            font-weight: bold;
+            text-align:center;
         }
 
         a {
@@ -14,25 +19,12 @@
         }
 
         #info {
+            color:#fff;
             position: absolute;
-            top: 10px; width: 100%;
-            color: #ffffff;
+            top: 0px; width: 100%;
             padding: 5px;
-            font-family: Monospace;
-            font-size: 13px;
-            text-align: center;
             z-index:100;
         }
-
-        a {
-            color: orange;
-            text-decoration: none;
-        }
-
-        a:hover {
-            color: #0080ff;
-        }
-
     </style>
     <!--[if lt IE 9]>
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
@@ -41,14 +33,6 @@
     <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
     <!--<![endif]-->
     <script src="build/three.min.js"></script>
-    <script src="js/shaders/ConvolutionShader.js"></script>
-    <script src="js/shaders/CopyShader.js"></script>
-    <script src="js/shaders/FXAAShader.js"></script>
-    <script src="js/postprocessing/EffectComposer.js"></script>
-    <script src="js/postprocessing/MaskPass.js"></script>
-    <script src="js/postprocessing/RenderPass.js"></script>
-    <script src="js/postprocessing/ShaderPass.js"></script>
-    <script src="js/postprocessing/BloomPass.js"></script>
     <script src="js/Detector.js"></script>
     <script src="js/libs/stats.min.js"></script>
 
@@ -62,12 +46,5 @@
     </script>
 </head>
 <body>
-<div id="info">
-    <a href="https://twitter.com/BlurSpline/status/396697405774520320" target="_blank">@blurspline</a> Chasing Bezier
-    Lights with
-    <a href="http://threejs.org" target="_blank">three.js</a><br/><br/>
-
-    <a href="#" onclick="return main.dizzy()">[Make me Dizzy!]</a>
-</div>
 </body>
 </html>
