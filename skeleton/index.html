@@ -4,27 +4,11 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <style>
         body {
+            font-family: Monospace;
+            color: #aaa;
             background-color: #000;
-            color: #fff;
             margin: 0px;
             overflow: hidden;
-            font-family:Monospace;
-            font-size:13px;
-            text-align:center;
-            font-weight: bold;
-            text-align:center;
-        }
-
-        a {
-            color:#0078ff;
-        }
-
-        #info {
-            color:#fff;
-            position: absolute;
-            top: 0px; width: 100%;
-            padding: 5px;
-            z-index:100;
         }
     </style>
     <!--[if lt IE 9]>
@@ -35,28 +19,51 @@
     <!--<![endif]-->
 
     <script src="../build/three.min.js"></script>
-    <script src="js/shaders/ConvolutionShader.js"></script>
+    <script src="js/libs/stats.min.js"></script>
+    <script src="js/libs/tween.min.js"></script>
+    <script src="js/Sparks.js"></script>
     <script src="js/shaders/CopyShader.js"></script>
+    <script src="js/shaders/FilmShader.js"></script>
+    <script src="js/shaders/FocusShader.js"></script>
+    <script src="js/shaders/HorizontalBlurShader.js"></script>
+    <script src="js/shaders/TriangleBlurShader.js"></script>
+    <script src="js/shaders/VerticalBlurShader.js"></script>
+
     <script src="js/postprocessing/EffectComposer.js"></script>
     <script src="js/postprocessing/RenderPass.js"></script>
+    <script src="js/postprocessing/ShaderPass.js"></script>
     <script src="js/postprocessing/MaskPass.js"></script>
     <script src="js/postprocessing/BloomPass.js"></script>
-    <script src="js/postprocessing/ShaderPass.js"></script>
-    <script src="js/Detector.js"></script>
+    <script src="js/postprocessing/FilmPass.js"></script>
+    <script src="fonts/helvetiker_regular.typeface.js"></script>
 
+    <script type="x-shader/x-vertex" id="vertexshader">
+        attribute float size;
+        attribute vec3 pcolor;
+        varying vec3 vColor;
+        void main() {
+            vColor = pcolor;
+            vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+            gl_PointSize = size * ( 200.0 / length( mvPosition.xyz ) );
+            gl_Position = projectionMatrix * mvPosition;
+        }
+    </script>
+    <script type="x-shader/x-fragment" id="fragmentshader">
+        uniform sampler2D texture;
+        varying vec3 vColor;
+        void main() {
+            vec4 outColor = texture2D( texture, gl_PointCoord );
+            gl_FragColor = outColor * vec4( vColor, 1.0 );
+        }
+    </script>
     <script type="text/javascript" src="js/Main.js"></script>
     <script type="text/javascript">
         var main;
         $(function () {
             main = new app.Main();
         });
-
     </script>
 </head>
 <body>
-<video id="video" autoplay loop style="display:none">
-    <source src="textures/sintel.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
-    <source src="textures/sintel.ogv" type='video/ogg; codecs="theora, vorbis"'>
-</video>
 </body>
 </html>
