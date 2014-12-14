@@ -3,6 +3,7 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
+
 THREE.CSS3DObject = function ( element ) {
 
 	THREE.Object3D.call( this );
@@ -21,6 +22,7 @@ THREE.CSS3DObject = function ( element ) {
 	} );
 
 };
+
 
 THREE.CSS3DObject.prototype = Object.create( THREE.Object3D.prototype );
 
