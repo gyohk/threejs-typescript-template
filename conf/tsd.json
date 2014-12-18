@@ -6,13 +6,16 @@
   "bundle": "typings/tsd.d.ts",
   "installed": {
     "threejs/three.d.ts": {
-      "commit": "4dd796bb15c51e5bc0efd74605fbc9de46773ca5"
+      "commit": "8e02d8df4e476fe08ec3f5e4dc36db4e645ea34f"
     },
     "stats/stats.d.ts": {
-      "commit": "4dd796bb15c51e5bc0efd74605fbc9de46773ca5"
+      "commit": "8e02d8df4e476fe08ec3f5e4dc36db4e645ea34f"
     },
     "jquery/jquery.d.ts": {
-      "commit": "bba33bcb0b363ae41db8517a09d1a4d07828616b"
+      "commit": "8e02d8df4e476fe08ec3f5e4dc36db4e645ea34f"
+    },
+    "webaudioapi/waa.d.ts": {
+      "commit": "8e02d8df4e476fe08ec3f5e4dc36db4e645ea34f"
     }
   }
 }
