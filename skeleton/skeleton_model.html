@@ -1,0 +1,23 @@
+<html>
+	<head>
+		<title>My first Three.js app</title>
+		<style>#container { width: 100%; height: 100% }</style>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r68/three.min.js"></script>
+        <!--[if lt IE 9]>
+        <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+        <![endif]-->
+        <!--[if gte IE 9]><!-->
+        <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+        <!--<![endif]-->
+		<script type="text/javascript" src="js/SkeletonModelMain.js"></script>
+        <script type="text/javascript">
+            $(function(){
+                var main = new app.SkeletonModelMain();
+                window.addEventListener('resize', main.handleResize, false);
+            });
+        </script>
+	</head>
+	<body>
+	<div id="container"></div>
+	</body>
+</html>
