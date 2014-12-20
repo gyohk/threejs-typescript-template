@@ -3,17 +3,22 @@
 module app {
     "use strict";
 
-    export class Main {
+    export class Main3 {
         private renderer:THREE.WebGLRenderer;
         private scene:THREE.Scene;
         private camera:THREE.PerspectiveCamera;
+        private systems: THREE.PointCloud[];
 
         private context: AudioContext;
         private sourceNode: AudioBufferSourceNode;
         private analyser: AnalyserNode;
         private analyser2: AnalyserNode;
+        private javascriptNode: ScriptProcessorNode;
 
         private rotSpeed = 0.005;
+
+        private scale = chroma.scale(['orange','red','white']).domain([0,255]);
+        private pm: THREE.ParticleBasicMaterial;
 
         constructor() {
             this.initTHREE();
@@ -26,53 +31,40 @@ module app {
             this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
             this.scene.add(this.camera);
             this.renderer = new THREE.WebGLRenderer({antialias: true});
-            this.renderer.setClearColor(0x000000, 1.0);
+            this.renderer.setClearColor(0x080808, 1.0);
             this.renderer.setSize(window.innerWidth, window.innerHeight);
             this.renderer.shadowMapEnabled = true;
             document.getElementById("container").appendChild(this.renderer.domElement);
         }
 
         private initScene():void {
+            this.pm = new THREE.ParticleBasicMaterial();
+            this.pm.map = THREE.ImageUtils.loadTexture("../assets/textures/particles/particle.png");
+            this.pm.blending= THREE.AdditiveBlending;
+            this.pm.transparent = true;
+            this.pm.size=1.5;
+            this.pm.vertexColors = true;
+            //this.pm.color = new THREE.Color(0x00ff00);
+
             // create the ground plane
-            var planeGeometry = new THREE.PlaneGeometry(80, 80);
-            var planeMaterial = new THREE.MeshPhongMaterial({color: 0x3333ff});
+            var planeGeometry = new THREE.PlaneGeometry(20, 12);
+            var planeMaterial = new THREE.MeshBasicMaterial({color: 0x444444});
             var plane = new THREE.Mesh(planeGeometry, planeMaterial);
             plane.receiveShadow = true;
 
             // rotate and position the plane
             plane.rotation.x = -0.5 * Math.PI;
             plane.position.x = 0;
-            plane.position.y = -2;
+            plane.position.y = -0.2;
             plane.position.z = 0;
 
             // add the plane to the scene
             this.scene.add(plane);
 
-            // create a cube
-            var cubeGeometry = new THREE.BoxGeometry(3, 6, 3, 15, 25, 15);
-
-            var pm = new THREE.ParticleBasicMaterial();
-            pm.map = THREE.ImageUtils.loadTexture("./assets/textures/particles/particle.png");
-            pm.blending= THREE.AdditiveBlending;
-            pm.transparent = true;
-            pm.size=1.0;
-            var ps = new THREE.PointCloud(cubeGeometry, pm);
-            ps.sortParticles = true;
-            ps.name="cube";
-            ps.position.x=1.75;
-            this.scene.add(ps);
-
-            var pm2 = pm.clone();
-            pm2.map = THREE.ImageUtils.loadTexture("./assets/textures/particles/particle2.png");
-            var ps2 = new THREE.PointCloud(cubeGeometry, pm2);
-            ps2.name = "cube2";
-            ps2.position.x=-1.75;
-            this.scene.add(ps2);
-
             // position and point the camera to the center of the scene
-            this.camera.position.x = 10;
-            this.camera.position.y = 14;
-            this.camera.position.z = 10;
+            this.camera.position.x = 15;
+            this.camera.position.y = 8;
+            this.camera.position.z = 15;
             this.camera.lookAt(this.scene.position);
 
             // add spotlight for the shadows
@@ -84,13 +76,15 @@ module app {
 
             this.scene.add(spotLight);
 
+            this.setupParticleSystem(25,25);
+
             // call the render function, after the first render, interval is determined
             // by requestAnimationFrame
             this.setupSound();
             this.render();
 
 
-            this.loadSound("./assets/audio/wagner-short.ogg");
+            this.loadSound("../assets/audio/imperial_march.ogg");
         }
 
         public render():void {
@@ -102,29 +96,22 @@ module app {
             this.camera.lookAt(this.scene.position);
 
             this.renderer.render(this.scene, this.camera);
-
-            this.updateCubes();
         }
 
+        private setupParticleSystem(widht: number, depth: number):void {
+            var targetGeometry = new THREE.Geometry();
 
-        private updateCubes():void {
-            // get the average for the first channel
-            var array =  new Uint8Array(this.analyser.frequencyBinCount);
-            this.analyser.getByteFrequencyData(array);
-            var average = this.getAverageVolume(array);
-
-            // get the average for the second channel
-            var array2 =  new Uint8Array(this.analyser2.frequencyBinCount);
-            this.analyser2.getByteFrequencyData(array2);
-            var average2 = this.getAverageVolume(array2);
-
-            // clear the current state
-            if (this.scene.getObjectByName("cube")) {
-                var cube = <THREE.PointCloud>this.scene.getObjectByName("cube");
-                var cube2 = <THREE.PointCloud>this.scene.getObjectByName("cube2");
-                cube.scale.y=average/20;
-                cube2.scale.y=average2/20;
+            for (var i = 0 ; i < widht ; i ++) {
+                for (var j = 0 ; j < depth ; j ++) {
+                    var v = new THREE.Vector3(i/2-(widht/2)/2, 0, j/2-(depth/2)/2);
+                    targetGeometry.vertices.push(v);
+                    targetGeometry.colors.push(new THREE.Color(Math.random() * 0xffffff));
+                }
             }
+
+            var ps = new THREE.PointCloud(targetGeometry,this.pm);
+            ps.name = 'ps';
+            this.scene.add(ps);
         }
 
         private setupSound():void {
@@ -132,18 +119,37 @@ module app {
                 if (! webkitAudioContext) {
                     alert("no audiocontext found");
                 }
-               AudioContext = webkitAudioContext;
+                AudioContext = webkitAudioContext;
             }
             this.context = new AudioContext();
 
+            // setup a javascript node
+            this.javascriptNode = this.context.createScriptProcessor(4096, 1, 1);
+            // connect to destination, else it isn't called
+            this.javascriptNode.connect(this.context.destination);
+            this.javascriptNode.onaudioprocess = () => {
+                // get the average for the first channel
+                var array =  new Uint8Array(this.analyser.frequencyBinCount);
+                this.analyser.getByteFrequencyData(array);
+
+                var ps = <THREE.PointCloud>this.scene.getObjectByName('ps');
+                var geom = ps.geometry;
+
+                for (var i = 0 ; i < array.length ; i++) {
+                    if (geom.vertices[i]) {
+                        geom.vertices[i].y=array[i]/40;
+                        geom.colors[i] = new THREE.Color(this.scale(array[i]).hex());
+                    }
+                }
+
+                ps.sortParticles=true;
+                geom.verticesNeedUpdate = true;
+            }
+
             // setup a analyzer
             this.analyser = this.context.createAnalyser();
-            this.analyser.smoothingTimeConstant = 0.4;
-            this.analyser.fftSize = 1024;
-
-            this.analyser2 = this.context.createAnalyser();
-            this.analyser2.smoothingTimeConstant = 0.4;
-            this.analyser2.fftSize = 1024;
+            this.analyser.smoothingTimeConstant = 0.8;
+            this.analyser.fftSize = 2048;
 
             // create a buffer source node
             this.sourceNode = this.context.createBufferSource();
@@ -155,7 +161,11 @@ module app {
             // connect one of the outputs from the splitter to
             // the analyser
             splitter.connect(this.analyser, 0);
-            splitter.connect(this.analyser2, 1);
+
+            // connect the splitter to the javascriptnode
+            // we use the javascript node to draw at a
+            // specific interval.
+            this.analyser.connect(this.javascriptNode);
 
             // and connect to destination
             this.sourceNode.connect(this.context.destination);
@@ -207,3 +217,7 @@ module app {
     }
 
 }
+
+
+
+

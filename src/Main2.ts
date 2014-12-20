@@ -3,15 +3,17 @@
 module app {
     "use strict";
 
-    export class Main {
+    export class Main2 {
         private renderer:THREE.WebGLRenderer;
         private scene:THREE.Scene;
         private camera:THREE.PerspectiveCamera;
+        private systems: THREE.PointCloud[];
 
         private context: AudioContext;
         private sourceNode: AudioBufferSourceNode;
         private analyser: AnalyserNode;
         private analyser2: AnalyserNode;
+        private c = 0;
 
         private rotSpeed = 0.005;
 
@@ -22,6 +24,8 @@ module app {
         }
 
         private initTHREE():void {
+            this.systems = [];
+
             this.scene = new THREE.Scene();
             this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
             this.scene.add(this.camera);
@@ -33,98 +37,68 @@ module app {
         }
 
         private initScene():void {
-            // create the ground plane
-            var planeGeometry = new THREE.PlaneGeometry(80, 80);
-            var planeMaterial = new THREE.MeshPhongMaterial({color: 0x3333ff});
-            var plane = new THREE.Mesh(planeGeometry, planeMaterial);
-            plane.receiveShadow = true;
-
-            // rotate and position the plane
-            plane.rotation.x = -0.5 * Math.PI;
-            plane.position.x = 0;
-            plane.position.y = -2;
-            plane.position.z = 0;
-
-            // add the plane to the scene
-            this.scene.add(plane);
-
-            // create a cube
-            var cubeGeometry = new THREE.BoxGeometry(3, 6, 3, 15, 25, 15);
-
-            var pm = new THREE.ParticleBasicMaterial();
-            pm.map = THREE.ImageUtils.loadTexture("./assets/textures/particles/particle.png");
-            pm.blending= THREE.AdditiveBlending;
-            pm.transparent = true;
-            pm.size=1.0;
-            var ps = new THREE.PointCloud(cubeGeometry, pm);
-            ps.sortParticles = true;
-            ps.name="cube";
-            ps.position.x=1.75;
-            this.scene.add(ps);
-
-            var pm2 = pm.clone();
-            pm2.map = THREE.ImageUtils.loadTexture("./assets/textures/particles/particle2.png");
-            var ps2 = new THREE.PointCloud(cubeGeometry, pm2);
-            ps2.name = "cube2";
-            ps2.position.x=-1.75;
-            this.scene.add(ps2);
-
             // position and point the camera to the center of the scene
-            this.camera.position.x = 10;
-            this.camera.position.y = 14;
-            this.camera.position.z = 10;
-            this.camera.lookAt(this.scene.position);
-
-            // add spotlight for the shadows
-            var spotLight = new THREE.SpotLight(0xffffff);
-            spotLight.position.set(10, 20, 20);
-            spotLight.shadowCameraNear = 20;
-            spotLight.shadowCameraFar = 50;
-            spotLight.castShadow = true;
-
-            this.scene.add(spotLight);
+            this.camera.position.x = 20;
+            this.camera.position.y = 34;
+            this.camera.position.z = 40;
+            this.camera.lookAt(new THREE.Vector3(-50,0,10));
 
             // call the render function, after the first render, interval is determined
             // by requestAnimationFrame
             this.setupSound();
-            this.render();
 
-
-            this.loadSound("./assets/audio/wagner-short.ogg");
+            this.loadSound("../assets/audio/imperial_march.ogg");
         }
 
         public render():void {
             requestAnimationFrame(() => this.render());
 
-            // update the camera
-            this.camera.position.x = this.camera.position.x * Math.cos(this.rotSpeed) + this.camera.position.z * Math.sin(this.rotSpeed);
-            this.camera.position.z = this.camera.position.z * Math.cos(this.rotSpeed) - this.camera.position.x * Math.sin(this.rotSpeed);
-            this.camera.lookAt(this.scene.position);
+            this.c++;
+            if (this.c % 2 == 0 ) this.updateWaves();
 
             this.renderer.render(this.scene, this.camera);
-
-            this.updateCubes();
         }
 
-
-        private updateCubes():void {
+        private updateWaves(): void {
             // get the average for the first channel
-            var array =  new Uint8Array(this.analyser.frequencyBinCount);
-            this.analyser.getByteFrequencyData(array);
-            var average = this.getAverageVolume(array);
+            var array = new Uint8Array(this.analyser.frequencyBinCount);
+            this.analyser.getByteTimeDomainData(array);
 
-            // get the average for the second channel
-            var array2 =  new Uint8Array(this.analyser2.frequencyBinCount);
-            this.analyser2.getByteFrequencyData(array2);
-            var average2 = this.getAverageVolume(array2);
+            // setup the material
+            var pm = new THREE.PointCloudMaterial();
+            pm.map = THREE.ImageUtils.loadTexture("../assets/textures/particles/particle.png");
+            pm.blending= THREE.AdditiveBlending;
+            pm.transparent = true;
+            pm.opacity = 0.2;
+            pm.size=1.5;
 
-            // clear the current state
-            if (this.scene.getObjectByName("cube")) {
-                var cube = <THREE.PointCloud>this.scene.getObjectByName("cube");
-                var cube2 = <THREE.PointCloud>this.scene.getObjectByName("cube2");
-                cube.scale.y=average/20;
-                cube2.scale.y=average2/20;
+            // create an empty geometry
+            var geom = new THREE.Geometry();
+
+            // add the vertices to the geometry based on the wavefrom
+            for (var i = 0; i < array.length ; i++) {
+                var v = new THREE.Vector3(1,array[i]/8,(i/15));
+                geom.vertices.push(v);
             }
+
+            // create a new particle system
+            var ps = new THREE.PointCloud(geom, pm);
+            ps.sortParticles = true;
+
+            // move the existing particle systems back
+            this.systems.forEach(function(e) {e.position.x-=1.5});
+
+            // and remove the oldest particle system
+            if (this.systems.length === 40) {
+                var oldPs = this.systems.shift();
+                if (oldPs) {
+                    this.scene.remove(oldPs);
+                }
+            }
+
+            // add the new to the systems array and the scene
+            this.systems.push(ps);
+            this.scene.add(ps);
         }
 
         private setupSound():void {
@@ -147,6 +121,7 @@ module app {
 
             // create a buffer source node
             this.sourceNode = this.context.createBufferSource();
+
             var splitter = this.context.createChannelSplitter();
 
             // connect the source to the analyser and the splitter
@@ -205,5 +180,4 @@ module app {
         }
 
     }
-
 }
