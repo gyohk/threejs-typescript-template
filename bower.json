@@ -1,0 +1,29 @@
+{
+  "name": "threejs-typescript-template",
+  "version": "0.0.0",
+  "homepage": "https://github.com/gyohk/threejs-typescript-template",
+  "authors": [
+    "gyoh_k"
+  ],
+  "main": "Gruntfile.js",
+  "license": "MIT",
+  "dependencies": {
+    "jquery1": "jquery#1",
+    "jquery2": "jquery#~2.1.1",
+    "stats.js": "*",
+    "dat-gui": "~0.5.0",
+    "threejs": "*"
+  },
+  "exportsOverride": {
+    "*": {
+      "js": "**/*.js",
+      "css": "**/*.css",
+      "images": [
+        "**/*.jpg",
+        "**/*.png",
+        "**/*.gif"
+      ],
+      "swf": "**/*.swf"
+    }
+  }
+}

@@ -6,19 +6,22 @@
   "bundle": "typings/tsd.d.ts",
   "installed": {
     "threejs/three.d.ts": {
-      "commit": "fd7728a4e622d1ea058127393d6b8e45badaefc1"
+      "commit": "42c8a3b74c05f6887ce21dd63c6234e424f9f8fe"
     },
     "stats/stats.d.ts": {
-      "commit": "fd7728a4e622d1ea058127393d6b8e45badaefc1"
+      "commit": "42c8a3b74c05f6887ce21dd63c6234e424f9f8fe"
     },
     "jquery/jquery.d.ts": {
-      "commit": "fd7728a4e622d1ea058127393d6b8e45badaefc1"
+      "commit": "42c8a3b74c05f6887ce21dd63c6234e424f9f8fe"
     },
     "webaudioapi/waa.d.ts": {
-      "commit": "fd7728a4e622d1ea058127393d6b8e45badaefc1"
+      "commit": "42c8a3b74c05f6887ce21dd63c6234e424f9f8fe"
     },
     "webrtc/MediaStream.d.ts": {
-      "commit": "fd7728a4e622d1ea058127393d6b8e45badaefc1"
+      "commit": "42c8a3b74c05f6887ce21dd63c6234e424f9f8fe"
+    },
+    "dat-gui/dat-gui.d.ts": {
+      "commit": "42c8a3b74c05f6887ce21dd63c6234e424f9f8fe"
     }
   }
 }

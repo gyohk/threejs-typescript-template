@@ -88,10 +88,22 @@ module.exports = function (grunt) {
                     
                 }
             }
+        },
+        bower: {
+            install: {
+                options: {
+                    targetDir: './<%= opt.outDir %>/libs',
+                    layout: 'byComponent',
+                    install: true,
+                    verbose: false,
+                    cleanTargetDir: true,
+                    cleanBowerDir: false
+                }
+            }
         }
     });
     
-    grunt.registerTask('setup', ['clean', 'tsd', 'copy']);
+    grunt.registerTask('setup', ['clean', 'tsd', 'copy', 'bower']);
     grunt.registerTask('default', ['ts', 'tslint']);
     
     // 
@@ -102,4 +114,5 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-tsd');
     grunt.loadNpmTasks('grunt-tslint');
     grunt.loadNpmTasks('grunt-typedoc');
+    grunt.loadNpmTasks('grunt-bower-task');
 };
